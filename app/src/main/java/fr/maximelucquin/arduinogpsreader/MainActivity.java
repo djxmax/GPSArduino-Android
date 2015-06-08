@@ -1,17 +1,22 @@
 package fr.maximelucquin.arduinogpsreader;
 
 import android.content.Context;
+import android.content.Intent;
 import android.hardware.usb.UsbDeviceConnection;
 import android.hardware.usb.UsbManager;
 import android.location.Location;
+import android.os.Environment;
 import android.support.v7.app.ActionBarActivity;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
+import android.view.View;
+import android.widget.RelativeLayout;
 import android.widget.TextView;
 import android.support.v7.widget.Toolbar;
 
+import com.getbase.floatingactionbutton.FloatingActionButton;
 import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.OnMapReadyCallback;
@@ -27,16 +32,25 @@ import com.hoho.android.usbserial.driver.UsbSerialProber;
 import com.hoho.android.usbserial.util.HexDump;
 import com.hoho.android.usbserial.util.SerialInputOutputManager;
 
+import java.io.File;
+import java.io.FileNotFoundException;
+import java.io.FileOutputStream;
 import java.io.IOException;
+import java.io.OutputStreamWriter;
+import java.io.PrintWriter;
+import java.text.SimpleDateFormat;
+import java.util.Date;
 import java.util.List;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
 
-public class MainActivity extends ActionBarActivity implements SerialInputOutputManager.Listener, OnMapReadyCallback {
+public class MainActivity extends ActionBarActivity implements SerialInputOutputManager.Listener, OnMapReadyCallback, View.OnClickListener {
 
     private Toolbar toolbar;
     private TextView text1, text2, text3, text4, text5, text6;
+    private FloatingActionButton fab;
+    private RelativeLayout progressContainer;
     private UsbSerialDriver driver;
     private UsbDeviceConnection connection;
     private List<UsbSerialPort> portList;
@@ -47,6 +61,9 @@ public class MainActivity extends ActionBarActivity implements SerialInputOutput
     private SupportMapFragment map;
     private GoogleMap googleMap;
     private Marker marker;
+    private Boolean fileMode;
+    private FileOutputStream file;
+    private PrintWriter fileWriter;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -63,12 +80,16 @@ public class MainActivity extends ActionBarActivity implements SerialInputOutput
         text4 = (TextView) findViewById(R.id.text4);
         text5 = (TextView) findViewById(R.id.text5);
         text6 = (TextView) findViewById(R.id.text6);
-
+        progressContainer = (RelativeLayout) findViewById(R.id.progress_container);
+        fab = (FloatingActionButton) findViewById(R.id.main_activity_fab);
+        fab.setOnClickListener(this);
 
         lat=0;
         lng=0;
         latLngMsg="";
         driver=null;
+        fileMode = false;
+        file=null;
 
         map = (SupportMapFragment) getSupportFragmentManager()
                 .findFragmentById(R.id.current_place_map);
@@ -145,17 +166,41 @@ public class MainActivity extends ActionBarActivity implements SerialInputOutput
             public void run() {
                 String rcvMsg = hexToString(HexDump.toHexString(data));
                 latLngMsg=latLngMsg+rcvMsg;
-                if(rcvMsg.indexOf(";")!=-1){
-                    String latLng[] = latLngMsg.split(",");
-                    latLng[1] = latLng[1].replace(";", "");
-                    text5.setText(latLng[0]);
-                    text6.setText(latLng[1]);
-                    lat = Double.valueOf(latLng[0]);
-                    lng = Double.valueOf(latLng[1]);
-                    latLngMsg="";
-                    System.out.println("lat "+lat);
-                    System.out.println("lng "+lng);
-                    setMarker();
+                if(rcvMsg.indexOf(";")!=-1){//message entier
+                    if(fileMode==false && rcvMsg.indexOf("#")==-1) {//mode reception donnée instantané
+                        String latLng[] = latLngMsg.split(",");
+                        latLng[1] = latLng[1].replace(";", "");
+                        text5.setText(latLng[0]);
+                        text6.setText(latLng[1]);
+                        lat = Double.valueOf(latLng[0]);
+                        lng = Double.valueOf(latLng[1]);
+                        System.out.println("lat " + lat);
+                        System.out.println("lng " + lng);
+                        setMarker();
+                    } else if(fileMode==false && rcvMsg.indexOf("#")!=-1){//debut mode enregistrement
+                        fileMode=true;
+                        progressContainer.setVisibility(View.VISIBLE);
+                    } else if(fileMode==true && rcvMsg.indexOf("#")==-1){//en cours d'enregistrement
+                        if(file!=null){
+                            fileWriter.println(latLngMsg);
+                        } else {
+                            file=createFile();
+                            fileWriter = new PrintWriter(file);
+                        }
+                    } else if(fileMode==true && rcvMsg.indexOf("#")!=-1){//fin enregistrement
+                        if(file!=null){
+                            try {
+                                fileWriter.flush();
+                                fileWriter.close();
+                                file.close();
+                            } catch (IOException e) {
+                                e.printStackTrace();
+                            }
+                        }
+                        fileMode=false;
+                        progressContainer.setVisibility(View.VISIBLE);
+                    }
+                    latLngMsg = "";
                 }
                 System.out.println("-------------------NEXT--------------------");
             }
@@ -214,6 +259,31 @@ public class MainActivity extends ActionBarActivity implements SerialInputOutput
                 marker.setPosition(new LatLng(lat, lng));
 
             }
+        }
+    }
+
+    private FileOutputStream createFile(){
+        try {
+            String root = Environment.getExternalStorageDirectory().toString();
+            File myDir = new File(root + "/Arduino_GPS_Reader");
+            myDir.mkdirs();
+            SimpleDateFormat formatter = new SimpleDateFormat("yyyy_MM_dd_HH_mm_ss");
+            Date now = new Date();
+            String fileName = "GPS_log_"+formatter.format(now) + ".csv";
+            File myFile = new File(myDir, fileName);
+            FileOutputStream file = new FileOutputStream(myFile);
+            return file;
+        } catch (FileNotFoundException e) {
+            e.printStackTrace();
+            return null;
+        }
+    }
+
+    @Override
+    public void onClick(View view) {
+        if(view.equals(fab)){
+            Intent myIntent = new Intent(MainActivity.this, FileActivity.class);
+            this.startActivity(myIntent);
         }
     }
 }

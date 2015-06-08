@@ -10,4 +10,7 @@
     <color name="myWindowBackground">#FFF</color>
     <color name="myTextPrimaryColor">#212121</color>
     <color name="myNavigationColor">#000</color>
+
+    <color name="myPrimaryColorTransparent">#993F51B5</color>
+    <color name="myTextPrimaryColorLight">#FFF</color>
 </resources>
