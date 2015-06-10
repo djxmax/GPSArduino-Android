@@ -166,7 +166,31 @@ public class MainActivity extends ActionBarActivity implements SerialInputOutput
             public void run() {
                 String rcvMsg = hexToString(HexDump.toHexString(data));
                 latLngMsg=latLngMsg+rcvMsg;
-                if(rcvMsg.indexOf(";")!=-1){//message entier
+                if(fileMode==false && rcvMsg.indexOf("#")!=-1){//debut mode enregistrement
+                    System.out.println("-------------------Debut fichier--------------------");
+                    fileMode=true;
+                    progressContainer.setVisibility(View.VISIBLE);
+                    String msg[] = latLngMsg.split("#");
+                    latLngMsg=msg[1];
+                } else if(fileMode==true && rcvMsg.indexOf("#")!=-1){//fin enregistrement
+                    System.out.println("-------------------fin fichier--------------------");
+                    String msg[] = latLngMsg.split("#");
+                    latLngMsg=msg[0];
+                    latLngMsg = latLngMsg.replaceAll("\r\n", "");
+                    fileWriter.print(latLngMsg);
+                    if(file!=null){
+                        try {
+                            fileWriter.flush();
+                            fileWriter.close();
+                            file.close();
+                        } catch (IOException e) {
+                            e.printStackTrace();
+                        }
+                    }
+                    fileMode=false;
+                    latLngMsg=msg[1];
+                    progressContainer.setVisibility(View.GONE);
+                } else if(rcvMsg.indexOf(";")!=-1){//message entier
                     if(fileMode==false && rcvMsg.indexOf("#")==-1) {//mode reception donnée instantané
                         String latLng[] = latLngMsg.split(",");
                         latLng[1] = latLng[1].replace(";", "");
@@ -177,28 +201,15 @@ public class MainActivity extends ActionBarActivity implements SerialInputOutput
                         System.out.println("lat " + lat);
                         System.out.println("lng " + lng);
                         setMarker();
-                    } else if(fileMode==false && rcvMsg.indexOf("#")!=-1){//debut mode enregistrement
-                        fileMode=true;
-                        progressContainer.setVisibility(View.VISIBLE);
                     } else if(fileMode==true && rcvMsg.indexOf("#")==-1){//en cours d'enregistrement
                         if(file!=null){
-                            fileWriter.println(latLngMsg);
+                            //line = latLngMsg.replace(System.getProperty("line.separator"), "");
+                            latLngMsg = latLngMsg.replaceAll("\r\n", "");
+                            fileWriter.print(latLngMsg);
                         } else {
                             file=createFile();
                             fileWriter = new PrintWriter(file);
                         }
-                    } else if(fileMode==true && rcvMsg.indexOf("#")!=-1){//fin enregistrement
-                        if(file!=null){
-                            try {
-                                fileWriter.flush();
-                                fileWriter.close();
-                                file.close();
-                            } catch (IOException e) {
-                                e.printStackTrace();
-                            }
-                        }
-                        fileMode=false;
-                        progressContainer.setVisibility(View.VISIBLE);
                     }
                     latLngMsg = "";
                 }

@@ -30,7 +30,10 @@ import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStreamReader;
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Date;
 
 import fr.maximelucquin.arduinogpsreader.entity.EntityList;
 import fr.maximelucquin.arduinogpsreader.entity.Point;
@@ -148,14 +151,25 @@ public class FileActivity extends ActionBarActivity implements OnMapReadyCallbac
                 BufferedReader reader = new BufferedReader(new InputStreamReader(fIn));
                 String line;
                 EntityList.pointList = new ArrayList<>();
+                SimpleDateFormat fmt = new SimpleDateFormat("ddMMyyHHmmssSS");
                 int i=1;
                 while ((line = reader.readLine()) != null) {
                     String[] RowData = line.split(",");
-                    EntityList.pointList.add(new Point(i,
-                            Double.valueOf(RowData[0]),
-                            Double.valueOf(RowData[1]),
-                            Double.valueOf(RowData[2].replace(";",""))));
-                    i++;
+                    Date date = new Date();
+                    if(RowData.length==6) {
+                        try {
+                            date = fmt.parse(RowData[3]+RowData[4]);
+                        } catch (ParseException e) {
+                            e.printStackTrace();
+                        }
+                        EntityList.pointList.add(new Point(i,//id
+                                Double.valueOf(RowData[0]),//lat
+                                Double.valueOf(RowData[1]),//lng
+                                Double.valueOf(RowData[2]),//alt
+                                date,//date
+                                RowData[5].replace(";", "")));//note
+                        i++;
+                    }
                 }
             }
             catch (IOException ex) {
@@ -176,13 +190,18 @@ public class FileActivity extends ActionBarActivity implements OnMapReadyCallbac
     }
 
     private void addMarker(){
+        SimpleDateFormat fmt = new SimpleDateFormat("dd/MM/yyyy HH:mm:ss");
         if(googleMap!=null){
             googleMap.clear();
             for(int i=0; i<EntityList.pointList.size();i++){
                 if(hideMarker==true) {
+                    String line = "Alt : " + Double.toString(EntityList.pointList.get(i).getAltitude()).substring(0, 3) + "\n" +
+                            "Date : " + fmt.format(EntityList.pointList.get(i).getDate()) + "\n" +
+                            "Note : " + EntityList.pointList.get(i).getNote();
                     googleMap.addMarker(new MarkerOptions()
                             .position(new LatLng(EntityList.pointList.get(i).getLatitude(), EntityList.pointList.get(i).getLongitude()))
                             .title("ID : " + EntityList.pointList.get(i).getId())
+                            .snippet(line)
                             .icon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_BLUE)));
                 }
                 if(i>0){
@@ -196,8 +215,8 @@ public class FileActivity extends ActionBarActivity implements OnMapReadyCallbac
             }
         }
         CameraUpdate center=
-                CameraUpdateFactory.newLatLng(new LatLng(EntityList.pointList.get(0).getLatitude(),
-                        EntityList.pointList.get(0).getLongitude()));
+                CameraUpdateFactory.newLatLng(new LatLng(EntityList.pointList.get(EntityList.pointList.size()-1).getLatitude(),
+                        EntityList.pointList.get(EntityList.pointList.size()-1).getLongitude()));
         googleMap.animateCamera(center);
     }
 

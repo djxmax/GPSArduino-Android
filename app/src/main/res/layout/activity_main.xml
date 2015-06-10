@@ -103,11 +103,13 @@
             android:layout_centerVertical="true"
             android:layout_centerHorizontal="true"/>
         <TextView
-            android:text="Reception des données en cours. Veuillez ne pas quitter"
-            android:layout_width="wrap_content"
+            android:text="Reception des données en cours...\nVeuillez ne pas quitter"
+            android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_below="@+id/progress_bar"
-            android:layout_centerHorizontal="true"/>
+            android:textColor="#FFF"
+            android:textSize="18sp"
+            android:gravity="center_horizontal"/>
 
 
 
