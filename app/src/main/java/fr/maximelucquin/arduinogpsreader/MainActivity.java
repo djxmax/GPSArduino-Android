@@ -48,7 +48,7 @@ import java.util.concurrent.Executors;
 public class MainActivity extends ActionBarActivity implements SerialInputOutputManager.Listener, OnMapReadyCallback, View.OnClickListener {
 
     private Toolbar toolbar;
-    private TextView text1, text2, text3, text4, text5, text6;
+    private TextView text1, text2, text3, text4, text5, text6, text7, text8;
     private FloatingActionButton fab;
     private RelativeLayout progressContainer;
     private UsbSerialDriver driver;
@@ -80,6 +80,8 @@ public class MainActivity extends ActionBarActivity implements SerialInputOutput
         text4 = (TextView) findViewById(R.id.text4);
         text5 = (TextView) findViewById(R.id.text5);
         text6 = (TextView) findViewById(R.id.text6);
+        text7 = (TextView) findViewById(R.id.text7);
+        text8 = (TextView) findViewById(R.id.text8);
         progressContainer = (RelativeLayout) findViewById(R.id.progress_container);
         fab = (FloatingActionButton) findViewById(R.id.main_activity_fab);
         fab.setOnClickListener(this);
@@ -193,14 +195,18 @@ public class MainActivity extends ActionBarActivity implements SerialInputOutput
                 } else if(rcvMsg.indexOf(";")!=-1){//message entier
                     if(fileMode==false && rcvMsg.indexOf("#")==-1) {//mode reception donnée instantané
                         String latLng[] = latLngMsg.split(",");
-                        latLng[1] = latLng[1].replace(";", "");
-                        text5.setText(latLng[0]);
-                        text6.setText(latLng[1]);
-                        lat = Double.valueOf(latLng[0]);
-                        lng = Double.valueOf(latLng[1]);
-                        System.out.println("lat " + lat);
-                        System.out.println("lng " + lng);
-                        setMarker();
+                        if(latLng.length==4) {
+                            latLng[3] = latLng[1].replace(";", "");
+                            text5.setText("Lat : " + latLng[0]);
+                            text6.setText("Lon : " + latLng[1]);
+                            text7.setText("Alt : " + latLng[2].substring(0, 3));
+                            text8.setText("Vit : " + latLng[3].substring(0, 3));
+                            lat = Double.valueOf(latLng[0]);
+                            lng = Double.valueOf(latLng[1]);
+                            System.out.println("lat " + lat);
+                            System.out.println("lng " + lng);
+                            setMarker();
+                        }
                     } else if(fileMode==true && rcvMsg.indexOf("#")==-1){//en cours d'enregistrement
                         if(file!=null){
                             //line = latLngMsg.replace(System.getProperty("line.separator"), "");
