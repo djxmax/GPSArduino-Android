@@ -29,6 +29,153 @@
             android:padding="5dp"/>
     </RelativeLayout>
 
+    <LinearLayout
+        android:id="@+id/setting_container"
+        android:layout_below="@+id/file_activity_toolbar"
+        android:layout_width="match_parent"
+        android:layout_height="250dp"
+        android:background="@color/myPrimaryColor"
+        android:visibility="gone"
+        android:orientation="vertical"
+        android:elevation="4dp"
+        android:padding="10dp">
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Affichage du trajet :"
+            android:textSize="16sp"
+            android:textColor="#FFF"
+            android:layout_marginBottom="5dp"/>
+        <RadioGroup
+            android:id="@+id/radioLine"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:gravity="center_horizontal"
+            android:orientation="horizontal">
+
+            <RadioButton
+                android:id="@+id/lineYes"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Oui"
+                android:textSize="16sp"
+                android:textColor="#FFF"
+                android:checked="true"
+                android:layout_marginRight="10dp"/>
+
+            <RadioButton
+                android:id="@+id/lineNo"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:textColor="#FFF"
+                android:text="Non"
+                android:textSize="16sp"/>
+
+        </RadioGroup>
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Affichage des points :"
+            android:textSize="16sp"
+            android:textColor="#FFF"
+            android:layout_marginTop="5dp"
+            android:layout_marginBottom="5dp"/>
+
+        <RadioGroup
+            android:id="@+id/radio2Marker"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:gravity="center_horizontal"
+            android:orientation="horizontal">
+
+            <RadioButton
+                android:id="@+id/marker2None"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Aucun"
+                android:textColor="#FFF"
+                android:checked="true"
+                android:layout_marginRight="10dp"
+                android:textSize="16sp"/>
+
+            <RadioButton
+                android:id="@+id/marker2justOther"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:textColor="#FFF"
+                android:text="Importants"
+                android:layout_marginRight="10dp"
+                android:textSize="16sp"/>
+            <RadioButton
+                android:id="@+id/marker2all"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:textColor="#FFF"
+                android:text="Tous"
+                android:textSize="16sp"/>
+
+        </RadioGroup>
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Affichage des points normaux :"
+            android:textSize="16sp"
+            android:textColor="#FFF"
+            android:layout_marginTop="5dp"
+            android:layout_marginBottom="5dp"/>
+        <RadioGroup
+            android:id="@+id/radioMarker"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:gravity="center_horizontal"
+            android:orientation="horizontal">
+
+            <RadioButton
+                android:id="@+id/markerAll"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Tous"
+                android:textColor="#FFF"
+                android:checked="true"
+                android:layout_marginRight="10dp"
+                android:textSize="16sp"/>
+
+            <RadioButton
+                android:id="@+id/marker3"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:textColor="#FFF"
+                android:text="1 sur 3"
+                android:layout_marginRight="10dp"
+                android:textSize="16sp"/>
+            <RadioButton
+                android:id="@+id/marker5"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:textColor="#FFF"
+                android:text="1 sur 5"
+                android:textSize="16sp"/>
+
+        </RadioGroup>
+        <RelativeLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="5dp">
+            <Button
+                android:id="@+id/settingOk"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="OK"
+                android:layout_alignParentRight="true"/>
+        </RelativeLayout>
+
+
+
+
+    </LinearLayout>
+
     <fragment
         android:id="@+id/file_place_map"
         android:layout_below="@+id/file_activity_toolbar"

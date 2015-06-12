@@ -9,7 +9,10 @@ import android.view.MenuItem;
 import android.view.View;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
+import android.widget.Button;
+import android.widget.LinearLayout;
 import android.widget.ListView;
+import android.widget.RadioButton;
 import android.widget.RelativeLayout;
 
 import com.getbase.floatingactionbutton.FloatingActionButton;
@@ -50,7 +53,11 @@ public class FileActivity extends ActionBarActivity implements OnMapReadyCallbac
     private String[] theNamesOfFiles;
     private File filelist[];
     private FloatingActionButton fab;
-    private Boolean hideMarker;
+    private Boolean hideMarker, hideAllMarker, hideLine;
+    private LinearLayout settingContainer;
+    private RadioButton lineYes, lineNo, pointNone, pointImportant, pointAll, pointNormalAll, pointNormal3, pointNormal5;
+    private Button ok;
+    private int pointDiv;
 
     private final double lat=48.29881172611295, lng=4.0776872634887695;
 
@@ -67,6 +74,35 @@ public class FileActivity extends ActionBarActivity implements OnMapReadyCallbac
         fileListview = (ListView) findViewById(R.id.file_list);
         fab = (FloatingActionButton) findViewById(R.id.file_activity_fab);
         fab.setOnClickListener(this);
+        settingContainer = (LinearLayout) findViewById(R.id.setting_container);
+        lineYes = (RadioButton) findViewById(R.id.lineYes);
+        lineNo = (RadioButton) findViewById(R.id.lineNo);
+        pointNone = (RadioButton) findViewById(R.id.marker2None);
+        pointImportant = (RadioButton) findViewById(R.id.marker2justOther);
+        pointAll = (RadioButton) findViewById(R.id.marker2all);
+        pointNormalAll = (RadioButton) findViewById(R.id.markerAll);
+        pointNormal3= (RadioButton) findViewById(R.id.marker3);
+        pointNormal5 = (RadioButton) findViewById(R.id.marker5);
+        ok = (Button) findViewById(R.id.settingOk);
+        hideMarker=true;
+        hideAllMarker=true;
+        hideLine=false;
+        lineYes.setChecked(true);
+        pointNone.setChecked(true);
+        pointNormalAll.setChecked(true);
+        pointDiv=1;
+
+        lineYes.setOnClickListener(this);
+        lineNo.setOnClickListener(this);
+        pointNone.setOnClickListener(this);
+        pointImportant.setOnClickListener(this);
+        pointAll.setOnClickListener(this);
+        pointNormalAll.setOnClickListener(this);
+        pointNormal3.setOnClickListener(this);
+        pointNormal5.setOnClickListener(this);
+        ok.setOnClickListener(this);
+
+        settingContainer.setVisibility(View.GONE);
 
         hideMarker=false;
 
@@ -91,6 +127,9 @@ public class FileActivity extends ActionBarActivity implements OnMapReadyCallbac
                 }
             }
         }
+
+        EntityList.pointList = new ArrayList<>();
+        fab.setVisibility(View.GONE);
     }
 
     @Override
@@ -111,6 +150,7 @@ public class FileActivity extends ActionBarActivity implements OnMapReadyCallbac
         if (id == R.id.action_list) {
             if(listContainer.getVisibility()== View.GONE){
                 listContainer.setVisibility(View.VISIBLE);
+                settingContainer.setVisibility(View.GONE);
             } else {
                 listContainer.setVisibility(View.GONE);
             }
@@ -150,7 +190,7 @@ public class FileActivity extends ActionBarActivity implements OnMapReadyCallbac
 
                 BufferedReader reader = new BufferedReader(new InputStreamReader(fIn));
                 String line;
-                EntityList.pointList = new ArrayList<>();
+
                 SimpleDateFormat fmt = new SimpleDateFormat("ddMMyyHHmmssSS");
                 int i=1;
                 while ((line = reader.readLine()) != null) {
@@ -187,26 +227,55 @@ public class FileActivity extends ActionBarActivity implements OnMapReadyCallbac
             e.printStackTrace();
         }
         addMarker();
+        fab.setVisibility(View.VISIBLE);
     }
 
     private void addMarker(){
-        SimpleDateFormat fmt = new SimpleDateFormat("dd/MM/yyyy HH:mm:ss");
         if(googleMap!=null){
+            SimpleDateFormat fmt = new SimpleDateFormat("dd/MM/yyyy HH:mm:ss");
             googleMap.clear();
-            for(int i=0; i<EntityList.pointList.size();i++){
-                if(hideMarker==true) {
-                    String line = "Alt : " + Double.toString(EntityList.pointList.get(i).getAltitude()).substring(0, 3) + "\n" +
-                            "Date : " + fmt.format(EntityList.pointList.get(i).getDate()) + "\n" +
-                            "Note : " + EntityList.pointList.get(i).getNote();
+            for(int i=0; i<EntityList.pointList.size();i++) {
+                Point curPoint = EntityList.pointList.get(i);
+                String line = "Alt : " + Double.toString(curPoint.getAltitude()).substring(0, 3) + "\n" +
+                        "Date : " + fmt.format(curPoint.getDate()) + "\n" +
+                        "Note : " + curPoint.getNote();
+
+                if (curPoint.getNote().equals("Tree") && hideAllMarker == false) {
                     googleMap.addMarker(new MarkerOptions()
-                            .position(new LatLng(EntityList.pointList.get(i).getLatitude(), EntityList.pointList.get(i).getLongitude()))
-                            .title("ID : " + EntityList.pointList.get(i).getId())
+                            .position(new LatLng(curPoint.getLatitude(), curPoint.getLongitude()))
+                            .title("ID : " + curPoint.getId())
                             .snippet(line)
-                            .icon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_BLUE)));
+                            .icon(BitmapDescriptorFactory.fromResource(R.drawable.map_tree_marker)));
+                } else if (curPoint.getNote().equals("Build") && hideAllMarker == false){
+                    googleMap.addMarker(new MarkerOptions()
+                            .position(new LatLng(curPoint.getLatitude(), curPoint.getLongitude()))
+                            .title("ID : " + curPoint.getId())
+                            .snippet(line)
+                            .icon(BitmapDescriptorFactory.fromResource(R.drawable.map_building_marker)));
+                } else if(curPoint.getNote().equals("Lamp") && hideAllMarker==false){
+                    googleMap.addMarker(new MarkerOptions()
+                            .position(new LatLng(curPoint.getLatitude(), curPoint.getLongitude()))
+                            .title("ID : " + curPoint.getId())
+                            .snippet(line)
+                            .icon(BitmapDescriptorFactory.fromResource(R.drawable.map_light_marker)));
+                } else if(curPoint.getNote().equals("PT") && hideAllMarker==false){
+                    googleMap.addMarker(new MarkerOptions()
+                            .position(new LatLng(curPoint.getLatitude(), curPoint.getLongitude()))
+                            .title("ID : " + curPoint.getId())
+                            .snippet(line)
+                            .icon(BitmapDescriptorFactory.fromResource(R.drawable.map_bus_marker)));
+                }else if(curPoint.getNote().equals("RAS") && hideAllMarker==false && hideMarker==false) {
+                    if(i%pointDiv==0) {
+                        googleMap.addMarker(new MarkerOptions()
+                                .position(new LatLng(curPoint.getLatitude(), curPoint.getLongitude()))
+                                .title("ID : " + curPoint.getId())
+                                .snippet(line)
+                                .icon(BitmapDescriptorFactory.fromResource(R.drawable.map_normal_marker)));
+                    }
                 }
-                if(i>0){
+                if(i>0 && hideLine==false){
                     googleMap.addPolyline((new PolylineOptions())
-                            .add(new LatLng(EntityList.pointList.get(i).getLatitude(), EntityList.pointList.get(i).getLongitude())
+                            .add(new LatLng(curPoint.getLatitude(), curPoint.getLongitude())
                                     , new LatLng(EntityList.pointList.get(i - 1).getLatitude(), EntityList.pointList.get(i - 1).getLongitude()))
                             .width(9)
                             .color(getResources().getColor(R.color.myAccentColor))
@@ -222,12 +291,31 @@ public class FileActivity extends ActionBarActivity implements OnMapReadyCallbac
 
     @Override
     public void onClick(View view) {
-        if(view.equals(fab) && EntityList.pointList!=null) {
-            if(EntityList.pointList.size()>0) {
-                if (hideMarker == false) hideMarker = true;
-                else hideMarker = false;
-                addMarker();
-            }
+        if(view.equals(fab) && EntityList.pointList.size()>0) {
+            if(settingContainer.getVisibility()==View.GONE) settingContainer.setVisibility(View.VISIBLE);
+            else if(settingContainer.getVisibility()==View.VISIBLE) settingContainer.setVisibility(View.GONE);
+        } else if(view.equals(lineYes)){
+            hideLine=false;
+        } else if(view.equals(lineNo)){
+            hideLine=true;
+        } else if(view.equals(pointNone)){
+            hideMarker=true;
+            hideAllMarker=true;
+        } else if(view.equals(pointImportant)){
+            hideMarker=true;
+            hideAllMarker=false;
+        } else if(view.equals(pointAll)){
+            hideMarker=false;
+            hideAllMarker=false;
+        } else if(view.equals(pointNormalAll)){
+            pointDiv=1;
+        } else if(view.equals(pointNormal3)){
+            pointDiv=3;
+        } else if(view.equals(pointNormal5)){
+            pointDiv=5;
+        } else if(view.equals(ok)){
+            settingContainer.setVisibility(View.GONE);
+            addMarker();
         }
     }
 }
