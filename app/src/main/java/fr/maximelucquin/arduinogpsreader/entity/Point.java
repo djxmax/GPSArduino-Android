@@ -7,15 +7,17 @@ import java.util.Date;
  */
 public class Point {
     private int id;
-    private double latitude, longitude, altitude;
+    private double latitude, longitude, altitude, distPointToPoint, distTotal;
     private Date date;
     private String note;
 
-    public Point(int id, double latitude, double longitude, double altitude, Date date, String note) {
+    public Point(int id, double latitude, double longitude, double altitude, double distPointToPointDate, double distTotal,Date date, String note) {
         this.id = id;
         this.latitude = latitude;
         this.longitude = longitude;
         this.altitude = altitude;
+        this.distPointToPoint=distPointToPointDate;
+        this.distTotal=distTotal;
         this.date=date;
         this.note=note;
     }
@@ -50,6 +52,22 @@ public class Point {
 
     public void setAltitude(double altitude) {
         this.altitude = altitude;
+    }
+
+    public double getDistPointToPoint() {
+        return distPointToPoint;
+    }
+
+    public void setDistPointToPoint(double distPointToPoint) {
+        this.distPointToPoint = distPointToPoint;
+    }
+
+    public double getDistTotal() {
+        return distTotal;
+    }
+
+    public void setDistTotal(double distTotal) {
+        this.distTotal = distTotal;
     }
 
     public Date getDate() {

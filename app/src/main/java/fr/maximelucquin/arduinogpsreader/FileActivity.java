@@ -196,9 +196,9 @@ public class FileActivity extends ActionBarActivity implements OnMapReadyCallbac
                 while ((line = reader.readLine()) != null) {
                     String[] RowData = line.split(",");
                     Date date = new Date();
-                    if(RowData.length==6) {
+                    if(RowData.length==8) {
                         try {
-                            date = fmt.parse(RowData[3]+RowData[4]);
+                            date = fmt.parse(RowData[5]+RowData[6]);
                         } catch (ParseException e) {
                             e.printStackTrace();
                         }
@@ -206,8 +206,10 @@ public class FileActivity extends ActionBarActivity implements OnMapReadyCallbac
                                 Double.valueOf(RowData[0]),//lat
                                 Double.valueOf(RowData[1]),//lng
                                 Double.valueOf(RowData[2]),//alt
+                                Double.valueOf(RowData[3]),// distPoint ot point
+                                Double.valueOf(RowData[4]),// dist Total
                                 date,//date
-                                RowData[5].replace(";", "")));//note
+                                RowData[7].replace(";", "")));//note
                         i++;
                     }
                 }
@@ -234,7 +236,7 @@ public class FileActivity extends ActionBarActivity implements OnMapReadyCallbac
         if(googleMap!=null){
             SimpleDateFormat fmt = new SimpleDateFormat("dd/MM/yyyy HH:mm:ss");
             googleMap.clear();
-            for(int i=0; i<EntityList.pointList.size();i++) {
+            for(int i=2; i<EntityList.pointList.size();i++) {
                 Point curPoint = EntityList.pointList.get(i);
                 String line = "Alt : " + Double.toString(curPoint.getAltitude()).substring(0, 3) + "\n" +
                         "Date : " + fmt.format(curPoint.getDate()) + "\n" +
